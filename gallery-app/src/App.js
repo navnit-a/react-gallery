@@ -1,40 +1,98 @@
-import {Fragment, useState} from "react";
+import {Fragment, useEffect, useMemo, useReducer, useState} from "react";
 import "./App.css";
 import NavBar from "./components/NavBar";
 import Card from "./components/Card";
 import UploadForm from "./components/UploadForm";
+import Layout from "./components/Layout";
 
-const photos = [
-	"https://picsum.photos/id/1001/200/200",
-	"https://picsum.photos/id/1002/200/200",
-	"https://picsum.photos/id/1003/200/200",
-	"https://picsum.photos/id/1004/200/200",
-	"https://picsum.photos/id/1005/200/200",
-	"https://picsum.photos/id/1006/200/200",
-];
+const photos = [];
+
+const initialState = {
+	items: photos,
+	count: photos.length,
+	inputs: {title: null, file: null, path: null},
+	isCollapsed: false,
+};
+
+const handleOnChange = (state, e) => {
+	if (e.target.name === "file") {
+		return {
+			...state.inputs,
+			file: e.target.files[0],
+			path: URL.createObjectURL(e.target.files[0]),
+		};
+	} else {
+		return {...state.inputs, title: e.target.value};
+	}
+};
+
+const reducer = (state, action) => {
+	switch (action.type) {
+		case "setItem":
+			return {
+				...state,
+				items: [state.inputs, ...state.items],
+				count: state.items.length + 1,
+				inputs: {title: null, file: null, path: null},
+			};
+		case "setInputs":
+			return {
+				...state,
+				inputs: handleOnChange(state, action.payload.value),
+			};
+		case "collapse":
+			return {
+				...state,
+				isCollapsed: action.payload.bool,
+			};
+		default:
+			return state;
+	}
+};
 
 function App() {
-	const [items, setItems] = useState(photos);
-	const [isCollapsed, setCollapsed] = useState(false);
+	const [state, dispatch] = useReducer(reducer, initialState);
+	// const [count, setCount] = useState();
 
-	const toggle = () => setCollapsed(!isCollapsed);
+	// const toggle = () => setCollapsed(!isCollapsed);
+	const toggle = (bool) => dispatch({type: "collapse", payload: {bool}});
+
+	const handleOnChange = (e) =>
+		dispatch({type: "setInputs", payload: {value: e}});
+
+	const handleOnSubmit = (e) => {
+		e.preventDefault();
+		dispatch({type: "setItem"});
+		toggle(!state.isCollapsed);
+	};
+
+	const count = useMemo(() => {
+		return `you have ${state.items.length} image${
+			state.items.length > 1 ? "s" : ""
+		}`;
+	}, [state.items]);
+
+	// useEffect(() => {
+	// 	setCount(
+	// 		`you have ${state.items.length} image${state.items.length > 1 ? "s" : ""}`
+	// 	);
+	// }, [state.items]);
+
 	return (
-		<Fragment>
-			<NavBar />
-			<div className="container text-center mt-5">
-				<button className="btn btn-success float-end" onClick={toggle}>
-					{isCollapsed ? "Close" : "+ Add"}
-				</button>
-				<div className="clearfix mb-4"></div>
-				<UploadForm isVisible={isCollapsed} />
-				<h1>Gallery</h1>
-				<div className="row">
-					{items.map((photo) => {
-						return <Card src={photo} />;
-					})}
-				</div>
+		<Layout
+			state={state}
+			onChange={handleOnChange}
+			onSubmit={handleOnSubmit}
+			toggle={toggle}
+		>
+			<h1 className="text-center">Gallery</h1>
+			{count}
+			<div className="row">
+				{state.items.map((item, index) => (
+					<Card key={index} {...item} />
+				))}
 			</div>
-		</Fragment>
+		</Layout>
 	);
 }
 
