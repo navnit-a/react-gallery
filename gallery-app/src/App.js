@@ -1,26 +1,12 @@
-import {useContext, useMemo} from "react";
+import {useContext, useEffect, useMemo} from "react";
 import "./App.css";
 import Card from "./components/Card";
 import Layout from "./components/Layout";
 import {Context} from "./context";
 
 function App() {
-	// const [state, dispatch] = useReducer(reducer, initialState);
-	const {state, dispatch} = useContext(Context);
+	const {state, read} = useContext(Context);
 	// debugger;
-	// const [count, setCount] = useState();
-
-	// const toggle = () => setCollapsed(!isCollapsed);
-	// const toggle = (bool) => dispatch({type: "collapse", payload: {bool}});
-
-	// const handleOnChange = (e) =>
-	// 	dispatch({type: "setInputs", payload: {value: e}});
-
-	// const handleOnSubmit = (e) => {
-	// 	e.preventDefault();
-	// 	dispatch({type: "setItem"});
-	// 	toggle(!state.isCollapsed);
-	// };
 
 	const count = useMemo(() => {
 		return `you have ${state.items.length} image${
@@ -28,11 +14,9 @@ function App() {
 		}`;
 	}, [state.items]);
 
-	// useEffect(() => {
-	// 	setCount(
-	// 		`you have ${state.items.length} image${state.items.length > 1 ? "s" : ""}`
-	// 	);
-	// }, [state.items]);
+	useEffect(() => {
+		read();
+	}, []);
 
 	return (
 		<Layout
