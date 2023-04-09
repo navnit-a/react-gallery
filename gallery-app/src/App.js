@@ -2,10 +2,12 @@ import {useContext, useEffect, useMemo} from "react";
 import "./App.css";
 import Card from "./components/Card";
 import Layout from "./components/Layout";
-import {Context} from "./context";
+import {Context} from "./context/FirestoreContext";
+import {useAuthContext} from "./context/AuthContext";
 
 function App() {
 	const {state, read} = useContext(Context);
+	const {authenticate} = useAuthContext();
 	// debugger;
 
 	const count = useMemo(() => {
@@ -16,6 +18,7 @@ function App() {
 
 	useEffect(() => {
 		read();
+		authenticate();
 	}, []);
 
 	return (
