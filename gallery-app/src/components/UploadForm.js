@@ -3,23 +3,31 @@ import {Context} from "../context/FirestoreContext";
 
 import Firestore from "../handlers/firestore";
 import Storage from "../handlers/storage";
+import {useAuthContext} from "../context/AuthContext";
 const {writeDoc} = Firestore;
 const {uploadFile, downloadFile} = Storage;
 
 const UploadForm = () => {
-	const {state, dispatch} = useContext(Context);
+	const {state, dispatch, read} = useContext(Context);
+	const {currentUser} = useAuthContext();
 	const {isCollapsed: isVisible, inputs} = state; // destructuring the current state
 
 	const handleOnChange = (e) =>
 		dispatch({type: "setInputs", payload: {value: e}});
+
+	const username = currentUser?.displayName.split(" ").join("");
 
 	const handleOnSubmit = (e) => {
 		e.preventDefault();
 		uploadFile(state.inputs)
 			.then(downloadFile)
 			.then((url) => {
-				writeDoc({...inputs, path: url}, "stocks").then(() => {
-					dispatch({type: "setItem"});
+				writeDoc(
+					{...inputs, path: url, user: username.toLowerCase()},
+					"stocks"
+				).then(() => {
+					// dispatch({type: "setItem"});
+					read();
 					dispatch({type: "collapse", payload: {bool: false}});
 				});
 			});
@@ -31,6 +39,7 @@ const UploadForm = () => {
 
 	const Preview = () => {
 		const {state} = useContext(Context);
+		const {currentUser} = useAuthContext();
 		const {inputs} = state;
 		return (
 			inputs.path && (
