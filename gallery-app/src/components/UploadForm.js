@@ -7,6 +7,24 @@ import {useAuthContext} from "../context/AuthContext";
 const {writeDoc} = Firestore;
 const {uploadFile, downloadFile} = Storage;
 
+const Preview = () => {
+	const {state} = useContext(Context);
+	const {inputs} = state;
+	return (
+		inputs.path && (
+			<div
+				className="rounded p-1 m-5"
+				style={{
+					width: "30%",
+					height: "300px",
+					backgroundImage: `url(${inputs.path}`,
+					backgroundSize: "cover",
+				}}
+			></div>
+		)
+	);
+};
+
 const UploadForm = () => {
 	const {state, dispatch, read} = useContext(Context);
 	const {currentUser} = useAuthContext();
@@ -36,25 +54,6 @@ const UploadForm = () => {
 	const isDisabled = useMemo(() => {
 		return !!Object.values(state.inputs).some((input) => !input);
 	}, [state.inputs]); // value is only recalculated if there is a change in the state - i.e. inputs
-
-	const Preview = () => {
-		const {state} = useContext(Context);
-		const {currentUser} = useAuthContext();
-		const {inputs} = state;
-		return (
-			inputs.path && (
-				<div
-					className="rounded p-1 m-5"
-					style={{
-						width: "30%",
-						height: "300px",
-						backgroundImage: `url(${inputs.path}`,
-						backgroundSize: "cover",
-					}}
-				></div>
-			)
-		);
-	};
 
 	return (
 		state.isCollapsed && (

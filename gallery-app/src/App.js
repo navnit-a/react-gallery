@@ -4,6 +4,7 @@ import Card from "./components/Card";
 import Layout from "./components/Layout";
 import {Context} from "./context/FirestoreContext";
 import {useAuthContext} from "./context/AuthContext";
+import List from "./components/List";
 
 function App() {
 	const {state, read} = useContext(Context);
@@ -22,20 +23,25 @@ function App() {
 	}, []);
 
 	return (
-		<Layout
-		// state={state}
-		// onChange={handleOnChange}
-		// onSubmit={handleOnSubmit}
-		// toggle={toggle}
-		>
+		<>
 			<h1 className="text-center">Gallery</h1>
 			{count}
-			<div className="row">
-				{state.items.map((item, index) => (
-					<Card key={index} {...item} />
-				))}
-			</div>
-		</Layout>
+			<List items={state.items} />
+		</>
+		// <Layout
+		// // state={state}
+		// // onChange={handleOnChange}
+		// // onSubmit={handleOnSubmit}
+		// // toggle={toggle}
+		// >
+		// 	<h1 className="text-center">Gallery</h1>
+		// 	{count}
+		// 	<div className="row">
+		// 		{state.items.map((item, index) => (
+		// 			<Card key={index} {...item} />
+		// 		))}
+		// 	</div>
+		// </Layout>
 	);
 }
 

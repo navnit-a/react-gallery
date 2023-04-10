@@ -1,5 +1,7 @@
-import {useMemo} from "react";
+import {useState, useMemo} from "react";
+import {Link, useLocation} from "react-router-dom";
 import {useAuthContext} from "../context/AuthContext";
+import {useFirestoreContext} from "../context/FirestoreContext";
 
 const LogIn = () => {
 	const {login, currentUser} = useAuthContext();
@@ -24,22 +26,63 @@ const LogOut = () => {
 };
 
 function Navigation() {
+	const {currentUser} = useAuthContext();
+	const {pathname} = useLocation();
 	return (
 		<ul className="navbar-nav me-auto mb-2 mb-lg-0">
 			{/* remove all links except HOME */}
 			<li className="nav-item">
-				<a className="nav-link active" aria-current="page" href="#">
+				<Link
+					className={`nav-link ${pathname === "/" ? "active" : ""}`}
+					aria-current="page"
+					to="/"
+				>
 					Home
-				</a>
+				</Link>
 			</li>
+			{currentUser && (
+				<li className="nav-item">
+					<Link
+						className={`nav-link ${
+							pathname === "/stockimages" ? "active" : ""
+						}`}
+						aria-current="page"
+						to="/stockimages"
+					>
+						My Stock Images
+					</Link>
+				</li>
+			)}
+			{currentUser && (
+				<li className="nav-item">
+					<Link
+						className={`nav-link ${pathname === "/profile" ? "active" : ""}`}
+						aria-current="page"
+						to="/profile"
+					>
+						Profile
+					</Link>
+				</li>
+			)}
 		</ul>
 	);
 }
 
 function SearchForm() {
+	const [text, search] = useState(null);
+	const {filterItems: filter} = useFirestoreContext();
+	const handleOnChange = (e) => {
+		search(e.target.value);
+		filter(e.target.value);
+	};
+	const handleOnSubmit = (e) => {
+		e.preventDefault();
+		filter(text);
+	};
 	return (
-		<form className="d-flex">
+		<form className="d-flex" onSubmit={handleOnSubmit}>
 			<input
+				onChange={handleOnChange}
 				className="form-control me-2"
 				type="search"
 				placeholder="Search"
@@ -83,19 +126,21 @@ function Dropdown() {
 					id="navbarDropdown"
 					role="button"
 					data-bs-toggle="dropdown"
-					// aria-expanded="false"
+					aria-expanded="false"
 				>
 					{avatar}
 				</a>
 				<ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-					<li>
-						<a className="dropdown-item text-center" href="#">
-							{username}
-						</a>
+					{currentUser && (
 						<li>
-							<hr className="dropdown divider" />
+							<a className="dropdown-item text-center" href="#">
+								<Link to="/profile">{username}</Link>
+							</a>
+							<li>
+								<hr className="dropdown divider" />
+							</li>
 						</li>
-					</li>
+					)}
 					<div className="d-flex justify-content-center">
 						<LogIn />
 						<LogOut />
